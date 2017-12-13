@@ -94,7 +94,26 @@ Another useful article is [TensorFlow: A proposal of good practices for files, f
 
 Let's think about the way we want the model to be used ultimately: given an array of nine current board positions, return the best square to pick for our next move.
 
-The input will be a 1-dim array with nine elements (each -1, 0, or 1) showing the current board state from this player's perspective (as defined in 
+The input will be a 1-dim array with nine elements (each -1, 0, or 1) showing the current board state from this player's perspective (as defined in the description of the CSV files for historical gameplay data, above). So you might feed `[0, 1, 0, -1, 1, -1, 0, 0, 0]` as a board. This means that the current player has its pieces in squares 1 and 4, and the opponent in squares 3 and 5. (Squares are numbered 0-8 from top left of the boardm running horizontally first, then the next row etc.) In this example, the best move is clearly to put our next piece (a 1) in square 7 to complete the middle vertical and win the game.
+
+So the output will just be a number such as 7 indicating the move that our model thinks we should make.
+
+However, in general there is no absolute right answer - just better or worse answers.
+
+You may remember from the MNIST tutorials that we actually end up with 10 probabilities showing the likelihood of each of the digits 0-9 being the digit that the handwritten input was supposed to represent. So let's borrow this idea, and in fact come up with a model that outputs a 1-dim array of nine elements, each representing the probability of that square being the best move.
+
+In `__init__` of TrainedPlayer, the input and _real-world_ (as opposed to model-predicted) outputs are represented as follows:
+
+```
+self.x = tf.placeholder(tf.float32, [None, 9], name="x")
+self.y_ = tf.placeholder(tf.float32, [None, 9], name="y_")
+```
+
+The `[None, 9]` means a 2-dim matrix of an unspecified number of rows, each of length 9. In training, we will supply multiple rows to the graph in one go; in evaluation we only supply one, representing the current board state.
+
+The basic TrainedPlayer has a prediction property representing a single 'perceptron' i.e. just one linear node of a neural network: y = Wx + b for weights W and constant bias term. How did I know to try that? It's the basic Deep MNIST solution.
+
+Likewise, I took the `optimize` property to be `tf.train.GradientDescentOptimizer(0.5).minimize(self.cost)` based on simple examples, where `self.cost` is `cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.prediction))` - that's what we want to minimze. The softmax activation function is the one that outputs a tensor of probabilities.
 
 ### Training the Model
 
