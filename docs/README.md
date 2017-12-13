@@ -9,13 +9,19 @@ So I wanted a 'playground' project to experiment with the available techniques.
 
 Inspired by AlphaGo Zero, I decided to build a Noughts and Crosses (Tic Tac Toe) playground, to see where that takes me. Crucially, if I can build a Machine Intelligence robot to play the game, I can get it to play against myself (and itself...)
 
-The game is not really very interesting mathematically. The player who starts has a significant advantage (and I believe can even always force a draw or a win). It also has a small 'universe'. Each square can have one of three values (blank, O or X), and there are only three squares. So the total possible space is 3^9 = 19,683 possible combinations – and this is further reduced if you apply the constraint that there can be at most one more square owned by player one compared to player two.  From a practical point of view, you could reduce this even further if you consider rotations and mirror images to represent the same basic game play.
+The game is not really very interesting mathematically. The player who starts has a significant advantage (and I believe can even always force a draw or a win). It also has a small 'universe'. Each square can have one of three values (blank, O or X), and there are only nine squares. So the total possible space is 3^9 = 19,683 possible combinations – and this is further reduced if you apply the constraint that there can be at most one more square owned by player one compared to player two.  From a practical point of view, you could reduce this even further if you consider rotations and mirror images to represent the same basic game play.
 
 So almost certainly, a search-based approach would be sufficient to tackle this problem, to find the next move that minimises the likelihood of losing.
 
 ## Setup – the non-ML framework
 
-Game.py and player.py. Game is instantiated with two Player objects – e g.  a RandomPlayer and a HumanPlayer. The RandomPlayer just randomly places its piece in an available spot. The HumanPlayer asks the computer operator which square to use. You can use main.py to run two players against each other in one game – just pick which class of Player you assign to p1 or p2.
+The files game.py and player.py contain the basic classes that allow the game to be played, in a flexible structure that means we can inherit classes to add Machine Learning versions of the player later on. Game is instantiated with two Player objects – e g.  a RandomPlayer and a HumanPlayer. The RandomPlayer just randomly places its piece in an available spot. The HumanPlayer asks the computer operator which square to use. You can use main.py to run two players against each other in one game – just pick which class of Player you assign to p1 or p2.
+
+For example, to pit the RandomPlayer against yourself (HumanPlayer) with the RandomPlayer as player 1 and making the first move, run the following from the root project directory having cloned the GitHub repo to your computer:
+
+```python3 main.py RandomPlayer HumanPlayer```
+
+The computer will place its first '1' piece in a random square, and then you are presented with the current state of the board as well as a reminder (on the right hand side) of the numbers 0-8 that you can enter to choose a square for your move.
 
 Within Game, the board is internally represented as a 1-dim array of 9 elements. Each element may be 0 for blank, 1 for player one's piece, and 2 for player two's. (We don't bother assigning O or X – they just stay as 1 or 2.)
 
@@ -24,9 +30,14 @@ Game's advance method will cause it to ask the next player to make a move (it ca
 Game has an output method to display the current state of the board at any time. Once the game is over, there is a get_journal method on Game to return each stage of the game in an array. This can be used to analyse the game at each stage now that we know the ultimate winner (was it a good move or not?).
 
 ### Generating Games
-We now want to do two things - build a framework for playing Players against each other, and also generate some random game data that we might be able to use to build our machine intelligence.
+We now want to do two things - build a framework for playing Players against each other, and also generate some random game data that we might be able to use to build our machine intelligence. That's what AlphaGo Zero supposedly did to learn the how to play Go!
 
-Look at generate_games.py. In p1 and p2, make sure it is creating RandomPlayers. The script will run as many games as specified in the games variable (e.g. 1000) and then output the scores to the screen. For example, with RandomPlayer versus RandomPlayer, you will probably see numbers like these:
+Look at generate_games.py. You can tell it to play 1000 games of RandomPlayer versus RandomPlayer as follows:
+
+```python3 generate_games.py RandomPlayer RandomPlayer --games 1000```
+
+The script will run as many games as specified in the games variable (e.g. 1000) and then output the final scores to the screen. For example, with RandomPlayer versus RandomPlayer, you will probably see numbers like these:
+
 ```
 Player 1 (RandomPlayer): Won 579
 Player 2 (RandomPlayer): Won 282
@@ -34,16 +45,26 @@ Draws: 139
 ```
 This shows the great advantage of being allowed to make the first move! (Player 1 is always asked to go first by the Game object.)
 
-The generate_games.py script also outputs every stage of the game to a file (e.g. data/Match-RandomPlayer-RandomPlayer-1000.csv). This is essentially a flattened version of each get_journal() from the Game objects.
+The generate_games.py script also outputs every stage of every game to a file (e.g. data/Match-RandomPlayer-RandomPlayer-1000.csv). This is essentially a flattened version of each get_journal() from the Game objects. For a finished Game, get_journal() will return an array showing the game play at each stage of the game, including knowledge of the move the next player made and whether this ultimate led to a win. This information could help our ML player learn the best moves to make given the same board layouts during its own games.
 
-The format is as follows, with no header row:
-```Columns 0-8, Next Move, Won Ultimately```
+The format of the file is as follows, with no header row:
+```Column 0, Col 1, Col 2, ..., Col 8, Next Move, Won Ultimately```
 
 Each of the columns 0-8 is from the perspective of the player who is about to make the next move. So their own pieces appear as 1's, opponent's as -1's, blanks as 0's. Next Move gives the cell number (0-8) of the move the player decided to make after reviewing the board presented here (Columns 0-8). Then Won Ultimately tells us whether the player ended up winning (1), losing (-1), or drawing (0).
 
 So if we run RandomPlayer against RandomPlayer 1,000 or certainly 10,000 games, we should have quite a lot of game play data (including multiple board positions for each game).
-First Machine Learning Algorithm
 
+If you want to get a feel for matching different types of players against each other, without having to act as a HumanPlayer for 100s of games, try using SequentialPlayer. For example:
+
+```python3 generate_games.py RandomPlayer SequentialPlayer --games 1000```
+
+SequentialPlayer is another simple algorithm for playing the game, but without randomness - it just picks the first free square it can find (looking from 0-8) and chooses to place its piece there.
+
+What happens if you switch SequentialPlayer to go as player 1, and RandomPlayer as player 2? What about if you pit SequentialPlayer against itself?
+
+## First Machine Learning Algorithm
+
+Now we have a great framework for working with the Noughts and Crosses game, and even generated some random gameplay data that we believe could be used to train a Machine Learning model, so it's time to see if we can build a ML-based Player class!
 
 https://danijar.com/structuring-your-tensorflow-models/
 
