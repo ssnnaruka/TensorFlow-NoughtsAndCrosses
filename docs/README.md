@@ -131,6 +131,26 @@ Iterating through each epoch and batch, the script basically just calls `sess.ru
 
 After training, it calls `model.save()` to output ckpt file(s) to the models folder so the weights can be loaded back in future. It also prints a prediction on the first board available in the CSV just so you can see a prediction in action.
 
+Basically, all we've done is find a nice structured way to run something like this example TensorFlow code, except iterated over in epochs/batches, and then saved at the end:
+
+```
+x = tf.placeholder(tf.float32, [None, 9], name="x")
+y_ = tf.placeholder(tf.float32, [None, 9], name="y_")
+
+W = tf.Variable(tf.zeros([9, 9]), name="W")
+b = tf.Variable(tf.zeros([9]), name="b")
+
+y = tf.nn.softmax(tf.matmul(x, W) + b, name="prediction")
+
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+
+init = tf.global_variables_initializer()
+
+with tf.Session() as sess:
+   sess.run(init)
+   sess.run(train_step, feed_dict={model.x: xs, model.y_: ys})
+```
 
 
 
