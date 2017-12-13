@@ -133,7 +133,7 @@ After training, it calls `model.save()` to output ckpt file(s) to the models fol
 
 Basically, all we've done is find a nice structured way to run something like this example TensorFlow code, except iterated over in epochs/batches, and then saved at the end:
 
-```
+```python
 x = tf.placeholder(tf.float32, [None, 9], name="x")
 y_ = tf.placeholder(tf.float32, [None, 9], name="y_")
 
