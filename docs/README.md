@@ -149,7 +149,7 @@ init = tf.global_variables_initializer()
 
 with tf.Session() as sess:
    sess.run(init)
-   sess.run(train_step, feed_dict={model.x: xs, model.y_: ys})
+   sess.run(train_step, feed_dict={x: all_xs, y_: all_ys})
 ```
 
 
