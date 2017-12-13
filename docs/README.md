@@ -94,7 +94,7 @@ Another useful article is [TensorFlow: A proposal of good practices for files, f
 
 Let's think about the way we want the model to be used ultimately: given an array of nine current board positions, return the best square to pick for our next move.
 
-The input will be a 1-dim array with nine elements (each -1, 0, or 1) showing the current board state from this player's perspective (as defined in the description of the CSV files for historical gameplay data, above). So you might feed `[0, 1, 0, -1, 1, -1, 0, 0, 0]` as a board. This means that the current player has its pieces in squares 1 and 4, and the opponent in squares 3 and 5. (Squares are numbered 0-8 from top left of the boardm running horizontally first, then the next row etc.) In this example, the best move is clearly to put our next piece (a 1) in square 7 to complete the middle vertical and win the game.
+The input will be a 1-dim array with nine elements (each -1, 0, or 1) showing the current board state from this player's perspective (as defined in the description of the CSV files for historical gameplay data, above). So you might feed `[0, 1, 0, -1, 1, -1, 0, 0, 0]` as a board. This means that the current player has its pieces in squares 1 and 4, and the opponent in squares 3 and 5. (Squares are numbered 0-8 from top left of the board, running horizontally first, then the next row etc.) In this example, the best move is clearly to put our next piece (a 1) in square 7 to complete the middle vertical and win the game.
 
 So the output will just be a number such as 7 indicating the move that our model thinks we should make.
 
@@ -116,6 +116,20 @@ The basic TrainedPlayer has a prediction property representing a single 'percept
 Likewise, I took the `optimize` property to be `tf.train.GradientDescentOptimizer(0.5).minimize(self.cost)` based on simple examples, where `self.cost` is `cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.prediction))` - that's what we want to minimze. The softmax activation function is the one that outputs a tensor of probabilities.
 
 ### Training the Model
+
+See the file train.py to try training our basic model. We need to choose a CSV file of gamedata to process, and parameters batchsize and epochs to tell it how many times to iterate through a full training loop (epochs) and how many board-position/winning-move pairs to try to optimize against in each step (batchsize). Again, the gameplay data was generated earlier, above, so provide a run of RandomPlayer versus itself games.
+
+```
+python3 train.py TrainedPlayer -i 'data/Match-RandomPlayer-RandomPlayer-100000.csv' --batchsize 10 --epochs 10
+```
+
+The train.py script loads the CSV and filters all the data so that it only keeps board positions where the corresponding move ultimately led to a win. There might be a way to train it _not_ to make a move that lost, but for now let's just focus on the 'winning' data. Remember the CSV has 11 columns: 0-8 represent a board position (current player represented by 1s), column 9 gives the move that was made next (0-8), and column 10 says which player ultimately won the game (1 for the current player, 0 for a draw, -1 if the other player won). So we just keep rows where column 10 is equal to 1.
+
+The script translates the remaining data into: all_xs - an array of all the current board positions only (i.e. just columns 0-8); and all_ys - an array of the winning moves in 'one-hot form', that is rows of 9 elements showing a 1 only in the column corresponding to the move, so a move in square 7 is represented by `[0, 0, 0, 0, 0, 0, 0, 1, 0]`.
+
+Iterating through each epoch and batch, the script basically just calls `sess.run(model.optimize)` on the current batch subset taken from all_xs and all_ys. Notice how it wraps everything in `with model.graph.as_default()` to ensure it accesses the TensorFlow graph specific to the TrainedPlayer object. It wouldn't matter here if everything was actually just defined on the default graph, but this could conflict at the evaluation stage if multiple graphs are loaded by different TrainedPlayers.
+
+After training, it calls `model.save()` to output ckpt file(s) to the models folder so the weights can be loaded back in future. It also prints a prediction on the first board available in the CSV just so you can see a prediction in action.
 
 
 
