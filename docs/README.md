@@ -75,10 +75,29 @@ What happens if you switch SequentialPlayer to go as player 1, and RandomPlayer 
 
 Now we have a great framework for working with the Noughts and Crosses game, and even generated some random gameplay data that we believe could be used to train a Machine Learning model, so it's time to see if we can build a ML-based Player class!
 
-https://danijar.com/structuring-your-tensorflow-models/
+Previous examples I'd looked at did the following all in one main script: build a TensorFlow graph, load in some training and test data, run some kind of optimization step to train the weights in the model, then evaluate the model compared to the test data. This is the 'boring stats' approach of the basic tutorials that I want to move away from! Don't just let the model die once we've got an accuracy score of some kind.
 
-File structure
-https://blog.metaflow.fr/tensorflow-a-proposal-of-good-practices-for-files-folders-and-models-architecture-f23171501ae3
+We want to build a basic TrainedPlayer class, inheriting from Player, which must be used in two distinct ways:
+
+1. Train the model based on some of our 'generate_games.py' data that we produced earlier, then save the model weights.
+2. Load the trained model so that it is immediately available to play a game or two of Noughts and Crosses, potentially against another instance of itself.
+
+There are some important TensorFlow concepts that I had to discover here. 
+
+How to create a Python class representation of a model so that we can plug the same graph into training and evaluation modes, accessed in different ways, without repeating code - the [Structuring Your TensorFlow Models](https://danijar.com/structuring-your-tensorflow-models/) article by Danijar Hafner is very helpful here.
+
+Take a look at trained_player.py. The decorator lazy_property is taken from these ideas, and in the class TrainedPlayer you can see prediction, cost, and optimize properties (plus accuracy) that are the 'graph components' to be used in training and reused in evaluation. These can also be extended if we inherit the base TrainedPlayer class to support a different model.
+
+Another useful article is [TensorFlow: A proposal of good practices for files, folders and models architecture](https://blog.metaflow.fr/tensorflow-a-proposal-of-good-practices-for-files-folders-and-models-architecture-f23171501ae3) by Morgan Giraud. We will borrow some ideas for using the TensorFlow [Saver](https://www.tensorflow.org/programmers_guide/saved_model) class to save and restore models and data, as well as having our model object maintain its own [Graph](https://www.tensorflow.org/api_docs/python/tf/Graph) object so that it can evaluate its model without conflicting with the default TensorFlow graph - which would otherwise happen if we try to run two ML Players at the same time since the second instance would try to redefine the same variables in TensorFlow.
+
+### Basic Neural Network model
+
+Let's think about the way we want the model to be used ultimately: given an array of nine current board positions, return the best square to pick for our next move.
+
+The input will be a 1-dim array with nine elements (each -1, 0, or 1) showing the current board state from this player's perspective (as defined in 
+
+### Training the Model
+
 
 
 
