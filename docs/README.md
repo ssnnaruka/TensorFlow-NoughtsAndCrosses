@@ -17,9 +17,11 @@ So almost certainly, a search-based approach would be sufficient to tackle this 
 
 The files game.py and player.py contain the basic classes that allow the game to be played, in a flexible structure that means we can inherit classes to add Machine Learning versions of the player later on. Game is instantiated with two Player objects – e g.  a RandomPlayer and a HumanPlayer. The RandomPlayer just randomly places its piece in an available spot. The HumanPlayer asks the computer operator which square to use. You can use main.py to run two players against each other in one game – just pick which class of Player you assign to p1 or p2.
 
-For example, to pit the RandomPlayer against yourself (HumanPlayer) with the RandomPlayer as player 1 and making the first move, run the following from the root project directory having cloned the GitHub repo to your computer:
+For example, to pit the RandomPlayer against yourself (HumanPlayer) with the RandomPlayer as player 1 and making the first move, run the following from the root project directory having cloned the GitHub repo to your computer (you may need to adjust depending on how Python 3 is installed on your computer):
 
-```python3 main.py RandomPlayer HumanPlayer```
+```
+python3 main.py RandomPlayer HumanPlayer
+```
 
 The computer will place its first '1' piece in a random square, and then you are presented with the current state of the board as well as a reminder (on the right hand side) of the numbers 0-8 that you can enter to choose a square for your move.
 
@@ -34,7 +36,9 @@ We now want to do two things - build a framework for playing Players against eac
 
 Look at generate_games.py. You can tell it to play 1000 games of RandomPlayer versus RandomPlayer as follows:
 
-```python3 generate_games.py RandomPlayer RandomPlayer --games 1000```
+```
+python3 generate_games.py RandomPlayer RandomPlayer --games 1000
+```
 
 The script will run as many games as specified in the games variable (e.g. 1000) and then output the final scores to the screen. For example, with RandomPlayer versus RandomPlayer, you will probably see numbers like these:
 
@@ -43,11 +47,12 @@ Player 1 (RandomPlayer): Won 579
 Player 2 (RandomPlayer): Won 282
 Draws: 139
 ```
+
 This shows the great advantage of being allowed to make the first move! (Player 1 is always asked to go first by the Game object.)
 
 The generate_games.py script also outputs every stage of every game to a file (e.g. data/Match-RandomPlayer-RandomPlayer-1000.csv). This is essentially a flattened version of each get_journal() from the Game objects. For a finished Game, get_journal() will return an array showing the game play at each stage of the game, including knowledge of the move the next player made and whether this ultimate led to a win. This information could help our ML player learn the best moves to make given the same board layouts during its own games.
 
-The format of the file is as follows, with no header row:
+The format of the file is as follows, with no header row: 
 ```Column 0, Col 1, Col 2, ..., Col 8, Next Move, Won Ultimately```
 
 Each of the columns 0-8 is from the perspective of the player who is about to make the next move. So their own pieces appear as 1's, opponent's as -1's, blanks as 0's. Next Move gives the cell number (0-8) of the move the player decided to make after reviewing the board presented here (Columns 0-8). Then Won Ultimately tells us whether the player ended up winning (1), losing (-1), or drawing (0).
@@ -56,7 +61,9 @@ So if we run RandomPlayer against RandomPlayer 1,000 or certainly 10,000 games, 
 
 If you want to get a feel for matching different types of players against each other, without having to act as a HumanPlayer for 100s of games, try using SequentialPlayer. For example:
 
-```python3 generate_games.py RandomPlayer SequentialPlayer --games 1000```
+```
+python3 generate_games.py RandomPlayer SequentialPlayer --games 1000
+```
 
 SequentialPlayer is another simple algorithm for playing the game, but without randomness - it just picks the first free square it can find (looking from 0-8) and chooses to place its piece there.
 
