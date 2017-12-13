@@ -104,7 +104,7 @@ You may remember from the MNIST tutorials that we actually end up with 10 probab
 
 In `__init__` of TrainedPlayer, the input and _real-world_ (as opposed to model-predicted) outputs are represented as follows:
 
-```
+```python
 self.x = tf.placeholder(tf.float32, [None, 9], name="x")
 self.y_ = tf.placeholder(tf.float32, [None, 9], name="y_")
 ```
@@ -151,6 +151,37 @@ with tf.Session() as sess:
    sess.run(init)
    sess.run(train_step, feed_dict={x: all_xs, y_: all_ys})
 ```
+
+### Evaluating the Model
+
+There are a couple of ways we want to use the model: get some stats showing how the results compare to our baseline RandomPlayer, and play against it ourselves through HumanPlayer.
+
+You could use generate_games.py to play directly and also write out further gameplay data. But you might prefer to use another script I built, called compare_players.py. In one command, this will build a table showing the results of multiple Players playing against each other in turn, and also switching over which Player goes first. You can specify a whole list of Players, but here we just have two:
+
+```
+python compare_players.py RandomPlayer TrainedPlayer --games 1000
+```
+
+It outputs something like this:
+
+```
+Number of player 1 wins (draws), against player 2:
+p2 \ p1         RandomPlayer TrainedPlayer
+RandomPlayer       614 (109)       940 (0)
+TrainedPlayer        276 (0)      1000 (0)
+```
+
+Player 1 is across the top, player 2 in the vertical rows. There were four bouts of competition, each containing 1000 games. The numbers show the number of games won by player 1 (or drew, in brackets).
+
+With RandomPlayer playing another instance of itself, the Player 1 version won 614 games, and drew 109.
+
+When TrainedPlayer was player 1, it beat RandomPlayer 940 times with 0 draws! That's much better than RandomPlayer can do against itself!
+
+Furthermore, if RandomPlayer goes first and TrainedPlayer is player 2, RandomPlayer only manages to win 276 games out of 1000. That's another great result (724 wins) for TrainedPlayer given the usual advantage we've seen player 1 usually obtain by moving first!
+
+Another interesting thing to note is that a player 1 TrainedPlayer always beats itself. 1000 to 0. It actually wouldn't be a major concern if it always lost or always drew, and maybe even you see that in your results. The fact is that our model is deterministic - for any given input board, we will always get the same output move since our neural network has fixed weights once trained. So the response from TrainedPlayer to an empty board is always the same, and then the response (as player 2) to that move is always the same, etc. Thus, the exact same game has been played out 1000 times - of course with the same result on every play!
+
+
 
 
 
