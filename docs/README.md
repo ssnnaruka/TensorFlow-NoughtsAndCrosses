@@ -3,7 +3,7 @@
 Most tutorials for machine learning ultimately end up in a script that outputs a number such as accuracy that might increase from 60% as a baseline to 92% after applying an ML algorithm. The training and evaluation processes are both part of the same script.
 It's just not very inspiring – I wanted to build something using ML that I could interact with, and feel how the ML techniques have actually contributed to it.
 
-After following a few tutorials ([MNIST](https://www.tensorflow.org/get_started/mnist/beginners) etc), I had a reasonable feel for Tensorflow and the Python environment needed for ML projects. Given a well-defined problem and the instruction to apply a specific algorithm, I felt I could probably work out how to get Tensorflow to do that. But I still had no idea which algorithms I would choose for a new project of my own. Take [Deep MNIST](https://www.tensorflow.org/get_started/mnist/pros) for example: the multiple convultional/pooled layers sound reasonable, but there is just no way you would automatically decide that the 'right' network would be the one you are instructed to build in that tutorial. The problem (most likely) is that it is just a question of trial and error, and experience. I suspect that even understanding the algorithms at a theoretical level would barely help...
+After following a few tutorials ([MNIST](https://www.tensorflow.org/get_started/mnist/beginners) etc), I had a reasonable feel for Tensorflow and the Python environment needed for ML projects. Given a well-defined problem and the instruction to apply a specific algorithm, I felt I could probably work out how to get Tensorflow to do that. But I still had no idea which algorithms I would choose for a new project of my own. Take [Deep MNIST](https://www.tensorflow.org/get_started/mnist/pros) for example: the multiple convolutional/pooled layers sound reasonable, but there is just no way you would automatically decide that the 'right' network would be the one you are instructed to build in that tutorial. The problem (most likely) is that it is just a question of trial and error, and experience. I suspect that even understanding the algorithms at a theoretical level would barely help...
 
 So I wanted a 'playground' project to experiment with the available techniques.
 
@@ -151,12 +151,13 @@ with tf.Session() as sess:
    sess.run(init)
    sess.run(train_step, feed_dict={x: all_xs, y_: all_ys})
 ```
-
 ### Evaluating the Model
 
 There are a couple of ways we want to use the model: get some stats showing how the results compare to our baseline RandomPlayer, and play against it ourselves through HumanPlayer.
 
-You could use generate_games.py to play directly and also write out further gameplay data. But you might prefer to use another script I built, called compare_players.py. In one command, this will build a table showing the results of multiple Players playing against each other in turn, and also switching over which Player goes first. You can specify a whole list of Players, but here we just have two:
+TrainedPlayer implements its ```do_move(board)``` function (a basic Player method) simply by running the prediction graph with only the board as an input, and getting the output weights which are probabilities for each potential board square 0-8. The method just picks the highest probability square that is currently empty. It first loads the model data from disk (assumes the model has been trained already), if not previously loaded.
+
+You could use generate_games.py to play directly and also write out further gameplay data. But you might prefer to use another script I wrote, called compare_players.py. In one command, this will build a table showing the results of multiple Players playing against each other in turn, and also switching over which Player goes first. You can specify a whole list of Players, but here we just have two:
 
 ```
 python compare_players.py RandomPlayer TrainedPlayer --games 1000
@@ -167,25 +168,62 @@ It outputs something like this:
 ```
 Number of player 1 wins (draws), against player 2:
 p2 \ p1         RandomPlayer TrainedPlayer
-RandomPlayer       614 (109)       940 (0)
-TrainedPlayer        276 (0)      1000 (0)
+RandomPlayer       580 (119)       795 (0)
+TrainedPlayer        459 (0)      1000 (0)
 ```
 
 Player 1 is across the top, player 2 in the vertical rows. There were four bouts of competition, each containing 1000 games. The numbers show the number of games won by player 1 (or drew, in brackets).
 
-With RandomPlayer playing another instance of itself, the Player 1 version won 614 games, and drew 109.
+With RandomPlayer playing another instance of itself, the Player 1 version won 580 games, and drew 119.
 
-When TrainedPlayer was player 1, it beat RandomPlayer 940 times with 0 draws! That's much better than RandomPlayer can do against itself!
+When TrainedPlayer was player 1, it beat RandomPlayer 795 times with 0 draws! That's much better than RandomPlayer can do against itself!
 
-Furthermore, if RandomPlayer goes first and TrainedPlayer is player 2, RandomPlayer only manages to win 276 games out of 1000. That's another great result (724 wins) for TrainedPlayer given the usual advantage we've seen player 1 usually obtain by moving first!
+Furthermore, if RandomPlayer goes first and TrainedPlayer is player 2, RandomPlayer only manages to win 459 games out of 1000. That's another great result (541 wins) for TrainedPlayer given the usual advantage we've seen player 1 usually obtain by moving first!
 
 Another interesting thing to note is that a player 1 TrainedPlayer always beats itself. 1000 to 0. It actually wouldn't be a major concern if it always lost or always drew, and maybe even you see that in your results. The fact is that our model is deterministic - for any given input board, we will always get the same output move since our neural network has fixed weights once trained. So the response from TrainedPlayer to an empty board is always the same, and then the response (as player 2) to that move is always the same, etc. Thus, the exact same game has been played out 1000 times - of course with the same result on every play!
+
+### Optimization
+
+When we ran the train.py script, we choose 10 epochs with a batchsize of 10. The cost value being minimized (and displayed every few thousand steps) is calculated on all board data in our sample. It makes sense to want this is low as possible, meaning our model fits as many of the 'winning moves' from our generated data as possible. But generally speaking, as long as the number is going down and looks stable, there's no real target value. We can only really evaluate the model based on how it performs in 'real life' against further random games, and I don't know if there's a sensible way to incorporate random gameplay into the training stages.
+
+Can we pick better numbers for training? E.g. a larger batchsize? If you don't want to overwrite the model you just produced, you'd have to make a new class, for example inherit TrainedPlayer100_10 from TrainedPlayer, and then make sure you run train.py with batchsize 100, epochs 10, to match.
+
+How about increasing batchsize to 100, but only running one epoch:
+
+```
+python3 train.py TrainedPlayer -i 'data/Match-RandomPlayer-RandomPlayer-100000.csv' --batchsize 100 --epochs 1
+```
+
+This trains quickly. In compare_players.py, this gives over 850 wins as player 1 versus RandomPlayer (top-right number in the output), compared to approx 800 when trained prevoiusly with lower batchsize but more epochs. This makes sense perhaps, as a larger batchsize means that the optimisation step can see more winning moves at the same time and adapt to them all.
+
+So how about batchsize of 1000, maybe with 10 epochs? This is back down to the 10/10 results, presumably because we are now not running enough individual steps for the algorithm to settle down.
+
+## Deeper Neural Networks
+
+Take a look at DeepTrainedPlayer (in trained_player.py). This is a simple Deep Neural Network, with two hidden layers between input and output, each with 10 nodes. So very similar to what we had before in TrainedPlayer, but with two layers now.
+
+Train like this:
+
+```
+python3 train.py DeepTrainedPlayer  -i 'data/Match-RandomPlayer-RandomPlayer-100000.csv' --batchsize 100 --epochs 10
+```
+
+This settles on a smaller cost value, and in compare_players.py tests gets around 927 in the main benchmark against RandomPlayer, and also scores well (only 267 losses) as player 2. Great!
+
+### Increasing Neurons
+
+How about increasing the size of the hidden layers so they have 100 neurons instead of just 10?
+
+That's DeepTrainedPlayer2x100 in our file (2 hidden layers each of 100 neurons). Training as above, this pushes up wins to 950 as player 1, and seems to do much better as player 2 too - 109 losses for example (plus around 70 draws though).
+
+### Increasing Number of Layers
+
 
 
 
 --
 End of article - notes for author are below.
-Git repo also not yet populated - please check later.
+Git code repo also not yet populated - please check later.
 
 Deep Learning 1
 
