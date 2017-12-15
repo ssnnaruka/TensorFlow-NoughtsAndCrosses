@@ -249,6 +249,53 @@ We can clearly see the improvement as we've advanced through these models.
 
 It is reassuring to see that TrainedPlayer can't beat our Deep models even when it moves first, although it seems slightly worrying that DeepTrainedPlayer2x100 beats the 'more advanced' DeepTrainedPlayer5x200 when it moves first. But remember this is not significant because both players are deterministic presented with the same board (which always starts blank), so in any case we are only seeing the exact same game play out 1000 times. And to reassure ourselves, remember there is a great advantage to moving first.
 
+But maybe it was really the number of neurons rather than number of layers that really gave us a breakthrough in the last stages? In fact, we find that a new class DeepTrainedPlayer2x200 with 2 layers of 200 neurons does just about as well as DeepTrainedPlayer5x200. So maybe 2x200 is sensible to move forward rather than trying to train a larger DNN.
+
+## Gameplay of our Model
+
+If you play against our favourite model so far:
+
+```
+python3 main.py DeepTrainedPlayer2x200 HumanPlayer
+```
+
+you should find it's a pretty interesting opponent and definitely keeps you on your toes. 
+
+Playing against it, it always seems to at least make the winning move if there is one available. It's obvious to us, and the first thing a human-programmed solution would do is to see if there is a single winning move. But it's amazing to think that's emerged statistically.
+
+If it runs as player 1, it has decided to fill the middle square (4) first, which feels sensible. I don't actually think that's the best first move on an empty board if you were playing against a good human player, but it makes sense against a RandomPlayer since it is the square that is part of the highest number of winning lines (four run through it, whereas the other squares only have 2 or 3).
+
+However, it plays in the following slightly disappointing way. Here is an extract from the end of a game against it (the human is player 2):
+
+```
+...
+Your move 0-8: 8
+ 1 |   | 2     0 1 2
+-----------
+   | 1 |       3 4 5
+-----------
+   |   | 2     6 7 8
+
+Computer's move: 3
+ 1 |   | 2     0 1 2
+-----------
+ 1 | 1 |       3 4 5
+-----------
+   |   | 2     6 7 8
+```
+
+This is 'wrong' because I'm clearly going to win the game by completing in square 5 on my very next move - unless the computer blocks it. But if you think about it, that may not actually be the best move against a RandomPlayer. It's actually very likely that RandomPlayer will not notice the winning strategy, so in fact our model might be quite right just to ignore that risk and plough on building its own winning line. Rather than 'waste' a move on blocking its random opponent, it actually places its piece in a square that guarantees it can win on the following move - provided the RandomPlayer misses its big chance. It seems likely that this approach is in fact the overall best move statistically to win the game. Provided you're playing a RandomPlayer. But this doesn't work if your opponent is human and awake.
+
+Thus our real failure is to feed it the random gameplay in the first place. It never really got to see how to protect against risks like this - because they didn't really exist in RandomPlayer versus RandomPlayer.
+
+### Generating more data
+
+So maybe we do really need our model to see real human gameplay if we want a more formiddable opponent (human-like or better). But it would be time consuming to collect a significant amount of human gameplay, certainly if we want it to be of high quality. 
+
+Here's another idea: what if we get DeepTrainedPlayer2x200 to play thousands of games itself and then re-train a new version of the model against that more advanced gameplay data?
+
+
+
 
 ## Improved Optimization and Regularization
 
@@ -262,5 +309,3 @@ End of article - notes for author are below.
 Git code repo also not yet populated - please check later.
 
 
-Also inspiring that it beats both itself and TrainedPlayer every time (and TrainedPlayer even if it goes first). But these are deterministic of course, so not actually significant.
-Playing against it, it always seems to at least make the winning move if there is one available. It's obvious to us, and the first thing a human-programmed solution would do is to see if there is a single winning move. But amazing to think that's emerged statistically.
