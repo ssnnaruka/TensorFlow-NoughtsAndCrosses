@@ -218,82 +218,25 @@ That's DeepTrainedPlayer2x100 in our file (2 hidden layers each of 100 neurons).
 
 ### Increasing Number of Layers
 
+DeepTrainedPlayer10x100 is a new version of our Deep Neural Network (DNN) that has 10 layers of 100 neurons each. It also simplifies the code considerably by using TensorFlow's built in tf.layers.dense. This saves writing out the weights calculations that form each layer.
 
+Trained as before, the cost never quite seems to settle down, and results are slightly worse than our two layer model. To check the code uses tf.layers.dense correctly, I first inherited DeepTrainedPlayerTF2x100 which is another version of the two layer model but using the simplified code. That trains and gives similar results to the original DeepTrainedPlayer2x100 so I imagine the code is OK.
+
+How about 5 layers instead of 10. DeepTrainedPlayer5x100 seems to settle down (cost) during training, and gives the best results so far - 981 wins as player 1, and only 115 losses as player 2.
+
+Similiarly, let's try increasing the layer sizes to 200 neurons each. DeepTrainedPlayer5x200 gives consistently slightly higher performance than DeepTrainedPlayer5x100.
+
+## Improved Optimization and Regularization
+
+We got some good results with our 5 layer DNN
+
+But was there a way for the 10 layer network to settle down during training? 
 
 
 --
 End of article - notes for author are below.
 Git code repo also not yet populated - please check later.
 
-Deep Learning 1
-
-Deep2TrainedPlayer
-```
-p2 \ p1              RandomPlayer TrainedPlayer Deep2TrainedPlayer
-RandomPlayer              51 (17)        92 (2)             85 (3)
-```
-Hidden_nodes = 20
-This is with 100,000 training games and batch_size of 100. Batch_size 10 gave 79.
-
-Batch_size 1000 gives 82.
-
-100000 games dataset / batch_size 100 -> 899
-
-With 1 epoch -> cost lowers to 2.179088
-With 10 epochs -> cost lowers to 2.038518, Score against RandomPlayer is 930 (maybe that was with 20 hidden nodes?)
-10 epochs, batchsize 1000 -> cost 2.178687, Score 906
-
-I read that a discontinuous function requires at least 2 hidden layers to be approximated.
-
-Deep2HiddenTrainedPlayer:
-Batchsize 100, epochs 1, cost to 2.188, score 837	
-Batchsize 1000, epochs 1, cost to 2.195, score 850 (not sure why higher)
-
-Batchsize 100, epochs 100, cost didn't seem to go below the 10 epoch seen above. Maybe we only had 10 neurons…?
-
-20 Neurons on 2 hidden layers each
-Batchsize 100, epochs 1, cost to 2.18
-
-Batchsize 10, epochs 1, cost to 2.04, Score 951
-
-First time we've seen better than TrainedPlayer against RandomPlayer!
-
-How about 50 neurons?
-Batchsize 10, epochs 1, cost to 2.04, Score 941
-
-So around the same again
-
-Maybe more epochs would help, or increased batch size so the neurons can pick up more or something…?
-
-Batchsize 100, epochs 5, cost to 2.04, score still a bit lower
-
-How about 100 neurons?
-Batchsize 10, epochs 10. Cost to 2.004796, score 980.
 
 Also inspiring that it beats both itself and TrainedPlayer every time (and TrainedPlayer even if it goes first). But these are deterministic of course, so not actually significant.
 Playing against it, it always seems to at least make the winning move if there is one available. It's obvious to us, and the first thing a human-programmed solution would do is to see if there is a single winning move. But amazing to think that's emerged statistically.
-
-
-Back to one hidden layer (Deep2TrainedPlayer).What about hidden_nodes = 100?
-pythonw train.py Deep2TrainedPlayer -i 'data/Match-RandomPlayer-RandomPlayer-100000.csv' --batchsize 10 --epochs 10
-Cost 2.012, Score 964
-So, better than 2 layers with 50 neurons, but not as good as 2 layers with 100 neurons.
-
-How about 200 neurons in the hidden layer?
-Cost 2.001493, Score 995
-
-
-How about 500 neurons in the hidden layer?
-Cost 2.010671, Score 974
-
-
-
-
-
-
-
-
-
-
-
-
