@@ -226,6 +226,30 @@ How about 5 layers instead of 10. DeepTrainedPlayer5x100 seems to settle down (c
 
 Similiarly, let's try increasing the layer sizes to 200 neurons each. DeepTrainedPlayer5x200 gives consistently slightly higher performance than DeepTrainedPlayer5x100.
 
+Increasing to 300 neurons (DeepTrainedPlayer5x300) doesn't seem to give a signifcant advance and probably isn't worth the extra training time that it takes.
+
+So 5 layers of 200 neurons each seems to work well for us. Let's compare some of our models so far:
+
+```
+python3 compare_players.py RandomPlayer TrainedPlayer DeepTrainedPlayer2x100 DeepTrainedPlayer5x200 --games 1000
+```
+
+For me, this gives:
+
+```
+Number of player 1 wins (draws), against player 2:
+p2 \ p1                  RandomPlayer TrainedPlayer DeepTrainedPlayer2x100 DeepTrainedPlayer5x200
+RandomPlayer                599 (126)       751 (0)               958 (23)                992 (4)
+TrainedPlayer                 442 (0)         0 (0)               1000 (0)               1000 (0)
+DeepTrainedPlayer2x100        158 (7)         0 (0)               1000 (0)               1000 (0)
+DeepTrainedPlayer5x200       135 (10)         0 (0)               1000 (0)               1000 (0)
+```
+
+We can clearly see the improvement as we've advanced through these models.
+
+It is reassuring to see that TrainedPlayer can't beat our Deep models even when it moves first, although it seems slightly worrying that DeepTrainedPlayer2x100 beats the 'more advanced' DeepTrainedPlayer5x200 when it moves first. But remember this is not significant because both players are deterministic presented with the same board (which always starts blank), so in any case we are only seeing the exact same game play out 1000 times. And to reassure ourselves, remember there is a great advantage to moving first.
+
+
 ## Improved Optimization and Regularization
 
 We got some good results with our 5 layer DNN
