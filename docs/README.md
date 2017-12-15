@@ -317,7 +317,9 @@ $ python3 train.py DeepTrainedPlayer2x200retrained -i 'data/Match-2x200retrained
 
 Note that in order to keep our models separate, we inherit a newly-named DeepTrainedPlayer2x200selftrained from DeepTrainedPlayer2x200. This has no new functionality, but allows us to keep a separate ckpt file from our original model.
 
-The final DeepTrainedPlayer2x200retrained model is very slightly worse than our original DeepTrainedPlayer2x200 - but I also notice that the cost function doesn't quite stabalise during training. The cost overall seems lower than it was for DeepTrainedPlayer2x200 though. A theory here is that we're 'overfitting' to the 2x200 gameplay data so it no longer performs quite so well against RandomPlayer. But that was the idea of course - we wanted something that was better against a human.
+The final DeepTrainedPlayer2x200retrained model is very slightly worse than our original DeepTrainedPlayer2x200 - but I also notice that the cost function doesn't quite stabilise during training. The cost overall seems lower than it was for DeepTrainedPlayer2x200 though. A theory here is that we're 'overfitting' to the 2x200 gameplay data so it no longer performs quite so well against RandomPlayer. But that was the idea of course - we wanted something that was better against a human.
+
+Interestingly, the 'retrained' model seems to get slightly more draws than the original - so definitely sees a higher overall 'win or draw' rate. That might be a sign of more competitive play?
 
 Anyway, I would be happier if the training algorithm stabilized.
 
@@ -325,11 +327,11 @@ Anyway, I would be happier if the training algorithm stabilized.
 
 You may remember when we trained the 10 layer DNN, it didn't stabilize. In the end, we decided two layers was enough. But was there a way for the 10 layer network to settle down during training? Maybe, and let's see if there are any techniques we can use to get DeepTrainedPlayer2x200retrained to settle first.
 
-Dropout is a popular regularization method. See DeepTrainedPlayer2x200rt_drop which I tried to train with the new 'self-training' data. It didn't seem to help, and also saw worse results (against RandomPlayer, of course) when I used the same technique on the original data only.
+Dropout is a popular regularization method. See DeepTrainedPlayer2x200rt_drop which I tried to train with the new 'self-training' data. It didn't seem to help, and also saw worse results (against RandomPlayer, of course) when I used the same technique on the original data only (DeepTrainedPlayer2x200drop).
 
 
 
-## Other network configurations
+## Other Neural Network configurations
 
 --
 End of article - notes for author are below.
