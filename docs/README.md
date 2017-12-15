@@ -294,8 +294,28 @@ So maybe we do really need our model to see real human gameplay if we want a mor
 
 Here's another idea: what if we get DeepTrainedPlayer2x200 to play thousands of games itself and then re-train a new version of the model against that more advanced gameplay data?
 
+Let's play 100,000 games of RandomPlayer (player 1) versus DeepTrainedPlayer2x200, and then another 100,000 games with DeepTrainedPlayer2x200 as player 1.
 
+And then we'll combine these games with our original 100,000 RandomPlayer versus RandomPlayer games just to make sure we're not missing anything and over-reinforcing our models own existing strategies.
 
+```
+$ python3 generate_games.py RandomPlayer DeepTrainedPlayer2x200 --games 100000
+Player 1 (RandomPlayer): Won 9550
+Player 2 (DeepTrainedPlayer2x200): Won 89413
+Draws: 1037
+
+$ python3 generate_games.py DeepTrainedPlayer2x200 RandomPlayer --games 100000
+Player 1 (DeepTrainedPlayer2x200): Won 98408
+Player 2 (RandomPlayer): Won 1321
+Draws: 271
+
+$ cat data/Match-DeepTrainedPlayer2x200-RandomPlayer-100000.csv data/Match-RandomPlayer-DeepTrainedPlayer2x200-100000.csv data/Match-RandomPlayer-RandomPlayer-100000.csv > data/Match-2x200retrained.csv
+
+$ python3 train.py DeepTrainedPlayer2x200retrained -i 'data/Match-2x200retrained.csv' --batchsize 100 --epochs 10
+...
+```
+
+Note that in order to keep our models separate, we inherit a newly-named DeepTrainedPlayer2x200selftrained from DeepTrainedPlayer2x200. This has no new functionality, but allows us to keep a separate ckpt file from our original model.
 
 ## Improved Optimization and Regularization
 
