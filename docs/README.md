@@ -1,6 +1,5 @@
 ---
 layout: default
-comments: true
 ---
 
 # Noughts and Crosses
@@ -363,3 +362,6 @@ The trained models could continue to learn as they play against a human opponent
 It would also be good to randomize the moves slightly - as it stands, the models are deterministic so you can always force them to play the same way as last time if you make the same moves. Continued training as they play against humans would probably be a better solution for this problem anyway.
 
 Please let me know your thoughts in the comments!
+
+{{ include "disqus.html" }}
+
