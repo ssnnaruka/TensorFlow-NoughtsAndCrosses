@@ -359,4 +359,5 @@ It would also be good to randomize the moves slightly - as it stands, the models
 
 Please let me know your thoughts in the comments!
 
+{% include disqus.html %}
 
