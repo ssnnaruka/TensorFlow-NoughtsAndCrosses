@@ -54,7 +54,7 @@ Draws: 139
 
 This shows the great advantage of being allowed to make the first move! (Player 1 is always asked to go first by the Game object.)
 
-The generate_games.py script also outputs every stage of every game to a file (e.g. data/Match-RandomPlayer-RandomPlayer-1000.csv). This is essentially a flattened version of each get_journal() from the Game objects. For a finished Game, get_journal() will return an array showing the game play at each stage of the game, including knowledge of the move the next player made and whether this ultimate led to a win. This information could help our ML player learn the best moves to make given the same board layouts during its own games.
+The generate_games.py script also outputs every stage of every game to a file (e.g. data/Match-RandomPlayer-RandomPlayer-1000.csv). This is essentially a flattened version of each get_journal() from the Game objects. For a finished Game, get_journal() will return an array showing the game play at each stage of the game, including knowledge of the move the next player made and whether this ultimately led to a win. This information could help our ML player learn the best moves to make given the same board layouts during its own games.
 
 The format of the file is as follows, with no header row: 
 ```Column 0, Col 1, Col 2, ..., Col 8, Next Move, Won Ultimately```
@@ -292,7 +292,7 @@ Thus our real failure is to feed it the random gameplay in the first place. It n
 
 ### Generating more data
 
-So maybe we do really need our model to see real human gameplay if we want a more formiddable opponent (human-like or better). But it would be time consuming to collect a significant amount of human gameplay, certainly if we want it to be of high quality. 
+So maybe we do really need our model to see real human gameplay if we want a more formidable opponent (human-like or better). But it would be time consuming to collect a significant amount of human gameplay, certainly if we want it to be of high quality. 
 
 Here's another idea: what if we get DeepTrainedPlayer2x200 to play thousands of games itself and then re-train a new version of the model against that more advanced gameplay data?
 
@@ -355,7 +355,7 @@ Other neural network architectures could be interesting to study, although I thi
 
 The trained models could continue to learn as they play against a human opponent.
 
-It would also be good to randomize the moves slightly - as it stands, the models are deterministic so you can always force them to play the same way as last time if you make the same moves. Continued training as they play against humans would probably be a better solution for this problem anyway.
+It would also be good to randomize the moves slightly - as it stands, the models are deterministic so you can always force them to play the same way as last time if you make the same moves. Continued training as they play against humans would probably be a better solution for this problem anyway, certainly if we not only feed the human 'winning data' into retraining, but also find a way to benefit from losing data to steer away from those moves in future.
 
 Please let me know your thoughts in the comments or issue tracker!
 
