@@ -9,7 +9,7 @@ So I wanted a 'playground' project to experiment with the available techniques.
 
 Inspired by AlphaGo Zero, I decided to build a Noughts and Crosses (Tic Tac Toe) playground, to see where that takes me. Crucially, if I can build a Machine Intelligence robot to play the game, I can get it to play against myself (and itself...)
 
-**This tutorial will explain the project and lead you through generating data to train various Machine Learning models, allowing you to play against the Machine Intelligence you've built. It assumes you have already installed TensorFlow on your machine and followed some of the basic 'deep learning' examples. The journey presented is my own experience experimenting with TensorFlow to understand how to use it. Presumes Python knowledge and ability to install packages etc.**
+**This tutorial will explain the project and lead you through generating data to train various Machine Learning models, allowing you to play against the Machine Intelligence you've built. It assumes you have already installed TensorFlow on your machine and followed some of the basic 'deep learning' examples. The journey presented is my own experience experimenting with TensorFlow to understand how to use it. Presumes Python knowledge and ability to install packages etc. See [code in GitHub](https://github.com/danlester/TensorFlow-NoughtsAndCrosses).**
 
 The game Noughts and Crosses is not really very interesting mathematically. The player who starts has a significant advantage (and I believe can even always force a draw or a win). It also has a small 'universe'. Each square can have one of three values (blank, O or X), and there are only nine squares. So the total possible space is 3^9 = 19,683 possible combinations – and this is further reduced if you apply the constraint that there can be at most one more square owned by player one compared to player two.  From a practical point of view, you could reduce this even further if you consider rotations and mirror images to represent the same basic game play.
 
@@ -329,12 +329,30 @@ You may remember when we trained the 10 layer DNN, it didn't stabilize. In the e
 
 Dropout is a popular regularization method. See DeepTrainedPlayer2x200rt_drop which I tried to train with the new 'self-training' data. It didn't seem to help, and also saw worse results (against RandomPlayer, of course) when I used the same technique on the original data only (DeepTrainedPlayer2x200drop).
 
-
-
 ## Other Neural Network configurations
 
---
-End of article - notes for author are below.
-Git code repo also not yet populated - please check later.
+If I come across any techniques or other neural network architectures that improve upon this, I will update the article! I would also appreciate any input from readers - I am just experimenting and learning here so please let me know where I've been mistaken.
 
+## Conclusion
 
+It was great to be able to play a game against my own creation, and I do think this was more rewarding than the 'stats based' tutorials where the performance boils down only to a simple number.
+
+I think that the key factors making this a successful project were:
+
+1.  The framework (non-ML) that we built to provide a simple way to manipulate games and players, and output the game data. In particular, the 'perspective' boards (pieces represented by 1 or -1 depending on which player is significant to what is happening - e.g. whose move is next) were really helpful for building data that we could work with using Machine Learning techniques.
+
+2.  Building a simple reusable 'model' class that could save and reload its weights, and have new models inherited where we only had to change small parts of the code. This meant we could experiment quickly, and compare results going forward without having to re-run all the training steps again.
+
+3. Choice of the RandomPlayer as a benchmark where we could run hundreds of games and gather the results. For such a small board, this was good enough to act as a baseline, although there were concerns that the trained models 'overfitted' the random player so weren't really prepared to play against a human.
+
+### Going forward
+
+I'm still not too sure how to encourage the training step to stabilise, and how best to measure the 'accuracy' during training.
+
+Other neural network architectures could be interesting to study, although I think it is unlikely we would see significantly improved performance.
+
+The trained models could continue to learn as they play against a human opponent.
+
+It would also be good to randomize the moves slightly - as it stands, the models are deterministic so you can always force them to play the same way as last time if you make the same moves. Continued training as they play against humans would probably be a better solution for this problem anyway.
+
+Please let me know your thoughts in the comments!
