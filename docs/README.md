@@ -359,5 +359,7 @@ It would also be good to randomize the moves slightly - as it stands, the models
 
 Please let me know your thoughts in the comments or issue tracker!
 
+PS. A mechanical algorithm for reinforcement-learning to play this game was created in 1961 [using matchboxes and coloured counters](http://www.mscroggs.co.uk/blog/19).
+
 {% include disqus.html %}
 
