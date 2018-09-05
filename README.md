@@ -10,5 +10,5 @@ Inspired by AlphaGo Zero, I decided to build a Noughts and Crosses (Tic Tac Toe)
 
 **This tutorial will explain the project and lead you through generating data to train various Machine Learning models, allowing you to play against the Machine Intelligence you've built. It assumes you have already installed TensorFlow on your machine and followed some of the basic 'deep learning' examples. The journey presented is my own experience experimenting with TensorFlow to understand how to use it. Presumes Python knowledge and ability to install packages etc.**
 
-You can [read the tutorial here](https://danlester.github.io/TensorFlow-NoughtsAndCrosses/).
+You can [read the tutorial here](https://ssnnaruka.github.io/TensorFlow-NoughtsAndCrosses/).
 
